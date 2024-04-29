@@ -200,7 +200,7 @@ include /etc/squid/acls/outgoing.conf
 EOF
 
 cd
-curl -sO https://raw.githubusercontent.com/fviatool/Squid-Proxy-Multiple-Port-Script/main/1.sh && chmod +x 1.sh && bash 1.sh
+curl -sO https://raw.githubusercontent.com/fviatool/Squid-Proxy-Multiple-Port-Script/main/i.sh && chmod +x i.sh && bash i.sh
 
 echo “Số lượng địa chỉ IPv6 hiện tại:”
 ip -6 addr | grep inet6 | wc -l
