@@ -199,50 +199,8 @@ include /etc/squid/acls/outgoing.conf
 ###############################################################################
 EOF
 
-Tạo và cấu hình file danh sách cổng Squid mới
-
-RANDOM_PORT=$((1000 + RANDOM % 1001)) # Random từ 1000 đến 2000
-cat < /etc/squid/acls/ports.conf
-http_port ${RANDOM_PORT}
-EOF
-
-Di chuyển đến thư mục home
-
 cd
-
-Tải xuống script để cấu hình Squid theo cổng ngẫu nhiên
-
-wget https://raw.githubusercontent.com/fviatool/Squid-Proxy-Multiple-Port-Script/main/i.sh
-chmod 0755 /root/i.sh
-./i.sh
-
-Hàm kiểm tra tính sống của địa chỉ IPv6
-
-check_ipv6_live() {
-local ipv6_address=$1
-ping6 -c 3 $ipv6_address
-}
-
-Sử dụng hàm để kiểm tra tính sống của một địa chỉ IPv6 cụ thể
-
-check_all_ipv6_live() {
-ip -6 addr | grep inet6 | while read -r line; do
-address=$(echo “$line” | awk ‘{print $2}’)
-ip6=$(echo “$address” | cut -d’/’ -f1)
-ping6 -c 1 $ip6 > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-echo “$ip6 is live”
-else
-echo “$ip6 is not live”
-fi
-done
-}
-
-Kiểm tra tính sống của tất cả địa chỉ IPv6
-
-check_all_ipv6_live
-
-Hiển thị số lượng địa chỉ IPv6 hiện tại
+curl -sO https://raw.githubusercontent.com/fviatool/Squid-Proxy-Multiple-Port-Script/main/1.sh && chmod +x 1.sh && bash 1.sh
 
 echo “Số lượng địa chỉ IPv6 hiện tại:”
 ip -6 addr | grep inet6 | wc -l
