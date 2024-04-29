@@ -1,19 +1,35 @@
 #!/bin/bash
 # Set the PATH to include common command directories
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Update và cài đặt các gói cần thiết
 apt update -y
 sudo apt install build-essential -y
+
+# Tải xuống và giải nén Squid
 wget https://raw.githubusercontent.com/khacnam/dev/main/squid-4.10.tar.gz
 tar xzf squid-4.10.tar.gz
 cd squid-4.10
+
+# Cấu hình và cài đặt Squid
 ./configure 'CXXFLAGS=-DMAXTCPLISTENPORTS=65000' --enable-ltdl-convenience
 make && make install
+
+# Cấp quyền cho thư mục log của Squid
 chmod 777 /usr/local/squid/var/logs/
+
+# Tạo thư mục cho Squid
 mkdir /var/spool/squid3
 mkdir /etc/squid
 mkdir /etc/squid/acls
+
+# Cấu hình hạn chế số lượng file mở đồng thời
 echo "* - nofile 500000" >> /etc/security/limits.conf
+
+# Xóa file cấu hình Squid mặc định (nếu có)
 rm -rf /etc/squid/squid.conf
+
+# Tạo và cấu hình file cấu hình Squid mới
 cat <<EOF > /etc/squid/squid.conf
 ###############################################################################
 ################################SOME  GLOBAL ACLs  ############################
@@ -170,7 +186,8 @@ reply_header_access Title allow all
 reply_header_access Content-Disposition allow all
 reply_header_access Connection allow all
 
-### All others are denied
+All others are denied
+
 reply_header_access All deny all
 
 shutdown_lifetime 30 seconds
@@ -181,32 +198,51 @@ shutdown_lifetime 30 seconds
 include /etc/squid/acls/outgoing.conf
 ###############################################################################
 EOF
-cd 
-wget https://raw.githubusercontent.com/khacnam/dev/main/setup.sh
-chmod 0755 /root/setup.sh
-./setup.sh
 
-# Hàm kiểm tra tính sống của địa chỉ IPv6
+Tạo và cấu hình file danh sách cổng Squid mới
+
+RANDOM_PORT=$((1000 + RANDOM % 1001)) # Random từ 1000 đến 2000
+cat < /etc/squid/acls/ports.conf
+http_port ${RANDOM_PORT}
+EOF
+
+Di chuyển đến thư mục home
+
+cd
+
+Tải xuống script để cấu hình Squid theo cổng ngẫu nhiên
+
+wget https://raw.githubusercontent.com/fviatool/Squid-Proxy-Multiple-Port-Script/main/i.sh
+chmod 0755 /root/i.sh
+./i.sh
+
+Hàm kiểm tra tính sống của địa chỉ IPv6
+
 check_ipv6_live() {
-    local ipv6_address=$1
-    ping6 -c 3 $ipv6_address
+local ipv6_address=$1
+ping6 -c 3 $ipv6_address
 }
 
-# Sử dụng hàm để kiểm tra tính sống của một địa chỉ IPv6 cụ thể
+Sử dụng hàm để kiểm tra tính sống của một địa chỉ IPv6 cụ thể
+
 check_all_ipv6_live() {
-    ip -6 addr | grep inet6 | while read -r line; do
-        address=$(echo "$line" | awk '{print $2}')
-        ip6=$(echo "$address" | cut -d'/' -f1)
-        ping6 -c 1 $ip6 > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            echo "$ip6 is live"
-        else
-            echo "$ip6 is not live"
-        fi
-    done
+ip -6 addr | grep inet6 | while read -r line; do
+address=$(echo “$line” | awk ‘{print $2}’)
+ip6=$(echo “$address” | cut -d’/’ -f1)
+ping6 -c 1 $ip6 > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+echo “$ip6 is live”
+else
+echo “$ip6 is not live”
+fi
+done
 }
+
+Kiểm tra tính sống của tất cả địa chỉ IPv6
 
 check_all_ipv6_live
-# Hiển thị số lượng địa chỉ IPv6 hiện tại
-echo "Số lượng địa chỉ IPv6 hiện tại:"
+
+Hiển thị số lượng địa chỉ IPv6 hiện tại
+
+echo “Số lượng địa chỉ IPv6 hiện tại:”
 ip -6 addr | grep inet6 | wc -l
