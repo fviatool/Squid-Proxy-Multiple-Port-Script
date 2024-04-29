@@ -14,7 +14,7 @@ fi
 echo "Card mang: $INTERFACE"
 
 # Tạo số ngẫu nhiên trong khoảng từ 1000 đến 2000
-RANDOM_PORT=$((1000 + RANDOM % 1001))
+RANDOM_PORT=$((1000 + RANDOM % 2000))
 
 # In ra số cổng ngẫu nhiên
 echo "Cổng ngẫu nhiên: $RANDOM_PORT"
@@ -112,6 +112,7 @@ main
 
 echo "Finished"
 
+# Script kiểm tra Squid đang hoạt động và tạo
 #!/bin/bash
 
 # Định nghĩa các biến
