@@ -4,7 +4,7 @@
     touch /etc/squid/passwd
     /bin/rm -f /etc/squid/squid.conf
     /usr/bin/touch /etc/squid/blacklist.acl
-    /usr/bin/wget --no-check-certificate -O /etc/squid/squid.conf https://raw.githubusercontent.com/sc6r-develop3rr/Squid-Proxy-Multiple-Port-Script/main/squid.conf
+    /usr/bin/wget --no-check-certificate -O /etc/squid/squid.conf https://raw.githubusercontent.com/fviatool/Squid-Proxy-Multiple-Port-Script/main/squid.conf
     /sbin/iptables -I INPUT -p tcp --dport 5000 -j ACCEPT
     /sbin/iptables -I INPUT -p tcp --dport 5001 -j ACCEPT
     /sbin/iptables -I INPUT -p tcp --dport 5002 -j ACCEPT
