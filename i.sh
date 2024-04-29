@@ -14,7 +14,7 @@ fi
 echo "Card mang: $INTERFACE"
 
 # Tạo số ngẫu nhiên trong khoảng từ 1000 đến 2000
-RANDOM_PORT=$((1000 + RANDOM % 2000))
+RANDOM_PORT=$((1000 + RANDOM % 1001))
 
 # In ra số cổng ngẫu nhiên
 echo "Cổng ngẫu nhiên: $RANDOM_PORT"
@@ -49,13 +49,13 @@ gen48() {
     ip64() {
         echo "${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}"
     }
-    echo "$1:$(ip64):$(ip64):$(ip64):$(ip64)"
+echo "2001:ee0:4f9b:92b0::$(ip64):$(ip64):$(ip64):$(ip64)"
 }
 
 # Generate random IPv6 addresses and save to file
 gen_ipv6() {
     for port in $(seq 1000 2000); do
-        echo "$(gen48 $IP6_PREFIX)"
+        echo "$(gen48)"
     done
 }
 gen_ipv6 > "$CONFIG_DIR/ipv6add.acl"
@@ -112,28 +112,14 @@ main
 
 echo "Finished"
 
-# Script kiểm tra Squid đang hoạt động và tạo
-#!/bin/bash
+sudo systemctl restart network
 
-# Định nghĩa các biến
-LOG_FILE="/var/log/squid_check.log"
-SQUID_IP="14.224.163.75"
-SQUID_PORT="1000-2000"
-SQUID_IPV6="2001:ee0:4f9b:92b0"
+# Ping google.com bằng IPv6
+ping_google6() {
+    ping6 -c 3 google.com
+}
 
-# Kiểm tra kết nối đến Squid sử dụng cổng và địa chỉ IPv6
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Kiểm tra kết nối đến Squid..." >> $LOG_FILE
-nc -zv -w 5 $SQUID_IP $SQUID_PORT >> $LOG_FILE 2>&1
-nc -6 -zv -w 5 $SQUID_IPV6 $SQUID_PORT >> $LOG_FILE 2>&1
-
-# Kiểm tra trạng thái của Squid service
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Kiểm tra trạng thái Squid service..." >> $LOG_FILE
-systemctl status squid >> $LOG_FILE 2>&1
-
-# Kiểm tra xem tệp squid.conf đã được tạo chưa
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Kiểm tra xem tệp squid.conf đã được tạo chưa..." >> $LOG_FILE
-if [ -f "/etc/squid/squid.conf" ]; then
-    echo "Tệp squid.conf đã được tạo." >> $LOG_FILE
-else
-    echo "Lỗi: Tệp squid.conf chưa được tạo." >> $LOG_FILE
-fi
+service network restart
+ping_google6
+ip -6 addr | grep inet6 | wc -l
+ip -6 route show
