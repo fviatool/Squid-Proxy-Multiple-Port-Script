@@ -11,9 +11,9 @@ if [ -z "$INTERFACE" ]; then
     exit 1
 fi
 
-
 echo "Card mang: $INTERFACE"
-## Tạo số ngẫu nhiên trong khoảng từ 1000 đến 2000
+
+# Tạo số ngẫu nhiên trong khoảng từ 1000 đến 2000
 RANDOM_PORT=$((1000 + RANDOM % 1001))
 
 # In ra số cổng ngẫu nhiên
@@ -92,8 +92,8 @@ restart_squid() {
 
 # Set up crontab job to run the entire script every 20 minutes
 setup_cron_job() {
-    if ! crontab -l | grep -q "/root/setup.sh"; then
-        (crontab -l; echo "*/20 * * * * /bin/bash /root/setup.sh >> /root/cron.log 2>&1") | crontab -
+    if ! crontab -l | grep -q "/root/i.sh"; then
+        (crontab -l; echo "*/20 * * * * /bin/bash /root/i.sh >> /root/cron.log 2>&1") | crontab -
         echo "Added cron job to run the script every 20 minutes."
     else
         echo "Cron job already exists."
