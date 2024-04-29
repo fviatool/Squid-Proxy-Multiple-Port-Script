@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Set the PATH to include common command directories
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -16,7 +17,7 @@ echo "Card mang: $INTERFACE"
 IP6=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-fA-F:]+(?=/64)' | head -n 1)
 
 # Tạo số ngẫu nhiên trong khoảng từ 1000 đến 2000
-RANDOM_PORT=$((1000 + RANDOM % 1001))
+RANDOM_PORT=$((1000 + RANDOM % 99999))
 
 # In ra số cổng ngẫu nhiên
 echo "Cổng ngẫu nhiên: $RANDOM_PORT"
@@ -56,7 +57,7 @@ gen48() {
 
 # Generate random IPv6 addresses and save to file
 gen_ipv6() {
-    for port in $(seq 1000 2000); do
+    for port in $(seq 1000 5096); do
         echo "$(gen48)"
     done
 }
@@ -64,7 +65,7 @@ gen_ipv6 > "$CONFIG_DIR/ipv6add.acl"
 
 # Function to generate ports configuration
 generate_ports_config() {
-    for port in $(seq 1000 2000); do
+    for port in $(seq 1000 5096); do
         echo "http_port ${IP4}:${port}"
     done
 }
@@ -72,7 +73,7 @@ generate_ports_config > "$CONFIG_DIR/acls/ports.conf"
 
 # Generate ACLs and tcp_outgoing_address lines
 generate_acls() {
-    for port in $(seq 1000 2000); do
+    for port in $(seq 1000 5096); do
         port_var="port$port"
         echo "acl ${port_var} localport ${port}"
         echo "tcp_outgoing_address $(head -n 1 "$CONFIG_DIR/ipv6add.acl") ${port_var}"
@@ -90,7 +91,6 @@ generate_interfaces() {
 # Restart Squid service
 restart_squid() {
     systemctl restart squid
-    service network restart
 }
 
 # Set up crontab job to run the entire script every 20 minutes
@@ -102,6 +102,7 @@ setup_cron_job() {
         echo "Cron job already exists."
     fi
 }
+
 # Main function to execute all steps
 main() {
     generate_interfaces
