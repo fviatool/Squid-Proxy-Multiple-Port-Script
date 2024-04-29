@@ -111,3 +111,28 @@ main() {
 main
 
 echo "Finished"
+
+#!/bin/bash
+
+# Định nghĩa các biến
+LOG_FILE="/var/log/squid_check.log"
+SQUID_IP="14.224.163.75"
+SQUID_PORT="1000-2000"
+SQUID_IPV6="2001:ee0:4f9b:92b0"
+
+# Kiểm tra kết nối đến Squid sử dụng cổng và địa chỉ IPv6
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Kiểm tra kết nối đến Squid..." >> $LOG_FILE
+nc -zv -w 5 $SQUID_IP $SQUID_PORT >> $LOG_FILE 2>&1
+nc -6 -zv -w 5 $SQUID_IPV6 $SQUID_PORT >> $LOG_FILE 2>&1
+
+# Kiểm tra trạng thái của Squid service
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Kiểm tra trạng thái Squid service..." >> $LOG_FILE
+systemctl status squid >> $LOG_FILE 2>&1
+
+# Kiểm tra xem tệp squid.conf đã được tạo chưa
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Kiểm tra xem tệp squid.conf đã được tạo chưa..." >> $LOG_FILE
+if [ -f "/etc/squid/squid.conf" ]; then
+    echo "Tệp squid.conf đã được tạo." >> $LOG_FILE
+else
+    echo "Lỗi: Tệp squid.conf chưa được tạo." >> $LOG_FILE
+fi
