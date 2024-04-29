@@ -13,6 +13,8 @@ fi
 
 echo "Card mang: $INTERFACE"
 
+IP6=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-fA-F:]+(?=/64)' | head -n 1)
+
 # Tạo số ngẫu nhiên trong khoảng từ 1000 đến 2000
 RANDOM_PORT=$((1000 + RANDOM % 1001))
 
@@ -46,10 +48,10 @@ echo "Internal ip = ${IP4}. Prefix for ip6 = ${IP6_PREFIX}"
 
 # Function to generate a random IPv6 address with 48 bits prefix
 gen48() {
-    ip64() {
+     ip64() {
         echo "${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}${array[$RANDOM % 16]}"
     }
-echo "2001:ee0:4f9b:92b0::$(ip64):$(ip64):$(ip64):$(ip64)"
+    echo "$1:$(ip64):$(ip64):$(ip64):$(ip64)"
 }
 
 # Generate random IPv6 addresses and save to file
@@ -81,13 +83,14 @@ generate_acls > "$CONFIG_DIR/acls/outgoing.conf"
 # Add IPv6 addresses to the network interface
 generate_interfaces() {
     while IFS= read -r ip; do
-        ip -6 addr add "$ip/64" dev "$INTERFACE"
+        ip -6 addr add "$IP6/64" dev "$INTERFACE"
     done < "$CONFIG_DIR/ipv6add.acl"
 }
 
 # Restart Squid service
 restart_squid() {
     systemctl restart squid
+    service network restart
 }
 
 # Set up crontab job to run the entire script every 20 minutes
@@ -99,7 +102,6 @@ setup_cron_job() {
         echo "Cron job already exists."
     fi
 }
-
 # Main function to execute all steps
 main() {
     generate_interfaces
@@ -119,7 +121,6 @@ ping_google6() {
     ping6 -c 3 google.com
 }
 
-service network restart
 ping_google6
 ip -6 addr | grep inet6 | wc -l
 ip -6 route show
